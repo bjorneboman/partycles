@@ -9,3 +9,4 @@ canvas.height = 600;
 
 const game = new Game(canvas, ctx);
 game.start();
+

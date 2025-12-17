@@ -1,20 +1,27 @@
 export class Trail {
   constructor() {
+    this.size = 1
+    this.segmentSize = 10
     this.segments = [];
   }
-
+  
   update(atom) {
     this.segments.unshift({ x: atom.x, y: atom.y });
-
+    
     // Kapa energisvansen om den blir groteskt lång
-    if (this.segments.length > 50) {
+    if (this.segments.length > this.size * this.segmentSize) {
       this.segments.pop();
     }
   }
-
+  
   extend() {
-    // Förläng via att inte poppa bort segment
-    this.segments.push({ ...this.segments[this.segments.length - 1] });
+    this.size++
+  }
+  
+  vapourize() {
+    this.size = 1
+    this.segmentSize = 10
+    this.segments = [];
   }
 
   draw(r) {

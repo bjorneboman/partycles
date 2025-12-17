@@ -1,6 +1,6 @@
 export function randomPhotonPosition(canvas) {
   return {
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height
+    x: Math.floor(Math.random() * canvas.width),
+    y: Math.floor(Math.random() * canvas.height)
   };
 }
