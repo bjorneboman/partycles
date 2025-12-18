@@ -1,14 +1,14 @@
+// TODO: Ta bort segmentSize? 
+
 export class Trail {
-  constructor() {
-    this.size = 1
+  constructor(x, y) {
+    this.size = 2
+    this.segments = [{x: x, y: y}]
     this.segmentSize = 10
-    this.segments = [];
   }
   
   update(atom) {
-    this.segments.unshift({ x: atom.x, y: atom.y });
-    
-    // Kapa energisvansen om den blir groteskt lång
+    this.segments.unshift({ x: atom.x, y: atom.y })
     if (this.segments.length > this.size * this.segmentSize) {
       this.segments.pop();
     }
@@ -18,16 +18,24 @@ export class Trail {
     this.size++
   }
   
-  vapourize() {
-    this.size = 1
-    this.segmentSize = 10
-    this.segments = [];
+  vapourize(x, y) {
+    this.size = 2
+    this.segments = [{x: x, y: y}, {x: x, y: y}]
   }
 
   draw(r) {
-    for (let i = 0; i < this.segments.length; i++) {
-      const t = 1 - i / this.segments.length;
-      r.circle(this.segments[i].x, this.segments[i].y, 5 * t, `rgba(0,255,255,${t})`);
+    this.segments[1].y -= (this.segments[0].x - this.segments[1].x) * (Math.random() - .5) * 3
+    this.segments[1].x -= (this.segments[0].y - this.segments[1].y) * (Math.random() - .5) * 3
+    for (let i = 1; i < this.segments.length; i++) {
+      const rollOff = 1 - i / this.segments.length
+      r.boltTrail(
+        this.segments[i-1].x, 
+        this.segments[i-1].y, 
+        this.segments[i].x, 
+        this.segments[i].y, 
+        1 * rollOff, 
+        `rgba(0,255,255,${rollOff*.66 + .8})`
+      )
     }
   }
 }

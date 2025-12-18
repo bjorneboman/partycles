@@ -1,20 +1,29 @@
 import { Trail } from "./Trail.js";
+import { Orbital } from "./Orbital.js";
 
 export class Atom {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.speed = 3;
+    this.lineUp = {x: 50, y: 50}
+    this.speed = 5;
     this.dir = { x: 1, y: 0 };
     this.radius = 10;
 
-    this.trail = new Trail()
+    this.orbital = new Orbital(this.x, this.y)
+    this.trail = new Trail(this.x, this.y)
   }
   
-  update() {
+  update(isRunning) {
+    if (isRunning) {
     this.x += this.dir.x * this.speed;
     this.y += this.dir.y * this.speed;
-    this.trail.update(this);
+    } else {
+      this.x += (this.lineUp.x - this.x) * .3 + Math.random()-.5
+      this.y += (this.lineUp.y - this.y) * .3 + Math.random()-.5
+    }
+    this.trail.update(this)
+    this.orbital.update(this)
   }
   
   collidesWithPhoton(photon) {
@@ -38,11 +47,12 @@ export class Atom {
     this.x = 100
     this.y = 100
     this.dir = { x: 1, y: 0 };
-    this.trail.vapourize()
+    this.trail.vapourize(this.x, this.y)
   }
 
-  draw(r) {
+  draw(r, isRunning) {
     r.circle(this.x, this.y, this.radius, "cyan");
+    this.orbital.draw(r, this.dir, isRunning)
     this.trail.draw(r);
 
   }

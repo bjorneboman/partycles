@@ -9,7 +9,7 @@ export class Game {
     this.canvas = canvas;
     this.ctx = ctx;
 
-    this.gameLenghtInSeconds = 60
+    this.gameLenghtInSeconds = 30
     this.timeLeft = this.gameLenghtInSeconds
     this.clockElement = document.querySelector("#clock")
     this.timer = null
@@ -19,45 +19,48 @@ export class Game {
     this.photons = [];
 
     this.renderer = new Renderer(ctx);
-    this.running = false;
+    this.isRunning = false;
 
     handleInput(this.atom);
   }
 
   start() {
+    this.clockElement.textContent = this.timeLeft
     // Pre-spawn photons
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       const { x, y } = randomPhotonPosition(this.canvas);
       this.photons.push(new Photon(x, y));
     }
+    // Reset game data
 
-    this.running = true;
+    // Reposition Atom and set direction
+
+    this.isRunning = true;
     this.loop();
     this.timer = setInterval(() => {this.gameClock()}, 1000)
   }
   
   gameClock() {
     if (this.timeLeft <= 0) {
-      this.running = false;
+      this.isRunning = false;
       clearInterval(this.timer)
-      return
-    }
+      this.gameOver()
+    } else {
+      this.clockElement.textContent = this.timeLeft
     this.timeLeft -= 1
-    this.clockElement.textContent = this.timeLeft
+    }
   }
   
   loop() {
-    if (!this.running) return;
-    
-    this.update();
+    this.update(this.isRunning);
     this.render();
-
     requestAnimationFrame(() => this.loop());
   }
 
-  update() {
-    this.atom.update();
+  update(isRunning) {
+    this.atom.update(isRunning);
   
+    if(isRunning) {
     // Foton-kollisioner
     for (let i = 0; i < this.photons.length; i++) {
       const p = this.photons[i];
@@ -72,19 +75,24 @@ export class Game {
     }
     
     // Kollisioner med vägg
-    if (this.atom.collidesWithWall(this.canvas)) this.annihilation(this.atom, this.trail)
+    if (this.atom.collidesWithWall(this.canvas)) this.annihilation(this.atom)
       
     // TODO: Kollisioner med egen svans
     
-
+    }
   }
-  annihilation(atom, trail) { 
+  annihilation(atom) { 
     atom.annihilateAndRespawn()
   }
 
+  gameOver() {
+    this.clockElement.textContent = "GAME OVER"
+
+  }
+
   render() {
-    this.renderer.clear(this.canvas);
-    this.photons.forEach(p => p.draw(this.renderer));
-    this.atom.draw(this.renderer);
+    this.renderer.clear(this.canvas)
+    if (this.isRunning) this.photons.forEach(p => p.draw(this.renderer))
+    this.atom.draw(this.renderer, this.isRunning)
   }
 }
