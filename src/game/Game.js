@@ -9,7 +9,7 @@ export class Game {
     this.canvas = canvas;
     this.ctx = ctx;
 
-    this.gameLenghtInSeconds = 30
+    this.gameLenghtInSeconds = 10
     this.timeLeft = this.gameLenghtInSeconds
     this.clockElement = document.querySelector("#clock")
     this.timer = null

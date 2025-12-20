@@ -1,6 +1,6 @@
 export class Orbital {
   constructor(x, y) {
-    this.size = 10
+    this.size = 40
     this.path = [{x: x, y: y}]
   }
   
@@ -26,7 +26,7 @@ export class Orbital {
         this.path[i].x, 
         this.path[i].y, 
         rollOff, 
-        `rgba(128,255,255,${rollOff * .8 + 0})`
+        `rgba(128,255,255,${rollOff * .2 + 0})`
       )
     }
   }
