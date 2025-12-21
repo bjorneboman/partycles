@@ -9,7 +9,10 @@ body {
     place-content: center;
     color:#0ff;
 }
-
+#lobby {
+    display: flex;
+    flex-direction: column;
+}
 #gameCanvas {
     display: block;
     margin: 0 auto;
