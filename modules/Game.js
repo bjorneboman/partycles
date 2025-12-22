@@ -1,7 +1,7 @@
-import { Atom } from "./Atom.js";
-import { Photon } from "./Photon.js";
-import { handleInput } from "./Input.js";
-import { Renderer } from "./Renderer.js";
+import { Atom } from "../game-elements/Boson.js";
+import { Photon } from "../game-elements/Photon.js";
+import { handleInput } from "../ui/Input.js";
+import { Renderer } from "../game-elements/Renderer.js";
 import { randomPhotonPosition } from "../utils/random.js";
 
 export class Game {

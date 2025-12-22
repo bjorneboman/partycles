@@ -1,5 +1,5 @@
 import { Trail } from "./Trail.js";
-import { Orbital } from "./Orbital.js";
+import { EMField } from "./EMField.js";
 
 export class Atom {
   constructor(x, y) {
@@ -10,7 +10,7 @@ export class Atom {
     this.dir = { x: 1, y: 0 };
     this.radius = 10;
 
-    this.orbital = new Orbital(this.x, this.y)
+    this.orbital = new EMField(this.x, this.y)
     this.trail = new Trail(this.x, this.y)
   }
   

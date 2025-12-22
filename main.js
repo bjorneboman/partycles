@@ -1,6 +1,6 @@
-import { Game } from "./src/game/Game.js";
+import { Game } from "./modules/Game.js";
 import { mpapi } from "./modules/mpapi.js"
-import {Lobby} from './src/ui/lobby.js';
+import {Lobby} from './ui/lobby.js';
 
 const SERVER_URL = `${location.protocol === "https:" ? "wss" : "ws"}://localhost:8080/net`;
 const APP_ID = "partycles-game"
