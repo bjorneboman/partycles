@@ -1,13 +1,15 @@
-import { Atom } from "./Atom.js";
-import { Photon } from "./Photon.js";
-import { handleInput } from "./Input.js";
-import { Renderer } from "./Renderer.js";
+import { Boson } from "../game-elements/Boson.js";
+import { Photon } from "../game-elements/Photon.js";
+import { handleInput } from "../ui/Input.js";
+import { Renderer } from "../game-elements/Renderer.js";
 import { randomPhotonPosition } from "../utils/random.js";
+import { PlaySession } from "./PlaySession.js";
 
 export class Game {
-  constructor(canvas, ctx) {
+  constructor(canvas, ctx, api) {
     this.canvas = canvas;
     this.ctx = ctx;
+    this.api = api
 
     this.gameLenghtInSeconds = 10
     this.timeLeft = this.gameLenghtInSeconds
@@ -15,13 +17,29 @@ export class Game {
     this.timer = null
 
 
-    this.atom = new Atom(100, 100);
+    this.atom = new Boson(100, 100);
     this.photons = [];
 
     this.renderer = new Renderer(ctx);
     this.isRunning = false;
 
     handleInput(this.atom);
+  }
+  
+  async host(playerName) {
+        try {
+        // .host() returns a Promise that gives us the session details
+        const response = await api.host({ name: playerName || "Host" });
+	    	myClientId = response.clientId
+        this.playSession = new PlaySession(this.atom, null, true)
+        console.log("Session created successfully!");
+        lobby.showStatusMessage(`You are hosting session ${response.session} as "${playerName}"`)
+        // updateSessionInfo()
+        // switchToGameView(response.session);
+    } catch (err) {
+        console.log(`Error hosting: ${err}`);
+    }
+
   }
 
   start() {
@@ -54,6 +72,7 @@ export class Game {
   loop() {
     this.update(this.isRunning);
     this.render();
+    this.playSession.frame()
     requestAnimationFrame(() => this.loop());
   }
 

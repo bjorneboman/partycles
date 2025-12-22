@@ -1,4 +1,4 @@
-export function handleInput(atom) {
+export function handleInput(boson) {
   window.addEventListener("keydown", e => {
 
     // Relative controls (only left and right arrows)
@@ -21,10 +21,10 @@ export function handleInput(atom) {
     //   }
 
     // Absolute controls (up, down, left and right arrows)
-    if (e.key === "ArrowUp") atom.dir = { x: 0, y: -1 };
-    if (e.key === "ArrowDown") atom.dir = { x: 0, y: 1 };
-    if (e.key === "ArrowLeft") atom.dir = { x: -1, y: 0 };
-    if (e.key === "ArrowRight") atom.dir = { x: 1, y: 0 };
+    if (e.key === "ArrowUp") boson.dir = { x: 0, y: -1 };
+    if (e.key === "ArrowDown") boson.dir = { x: 0, y: 1 };
+    if (e.key === "ArrowLeft") boson.dir = { x: -1, y: 0 };
+    if (e.key === "ArrowRight") boson.dir = { x: 1, y: 0 };
   });
 }
 /*

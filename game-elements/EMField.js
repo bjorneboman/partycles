@@ -1,4 +1,4 @@
-export class Orbital {
+export class EMField {
   constructor(x, y) {
     this.size = 40
     this.path = [{x: x, y: y}]
