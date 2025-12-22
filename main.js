@@ -1,15 +1,22 @@
+// TODO's //
+// 1. Make one boson controlled by host move synchronously for everyone
+// 2. Spawn a boson for every client
+// 3. Make all bosons move synchronously for everyone
+
+
+
 import { Game } from "./modules/Game.js";
 import { mpapi } from "./modules/mpapi.js"
 import {Lobby} from './ui/lobby.js';
 
-const SERVER_URL = `${location.protocol === "https:" ? "wss" : "ws"}://localhost:8080/net`;
+// const SERVER_URL = `${location.protocol === "https:" ? "wss" : "ws"}://localhost:8080/net`;
 const APP_ID = "partycles-game"
+const SERVER_URL = "wss://mpapi.se/net";
 let myClientId = null
 let playerName = ""
 // const players = {
 //     myClientId: {playerName: "Anon"}
 // }
-// const SERVER_URL = "wss://mpapi.se/net";
 
 
 // --- INITIALIZATION ---
@@ -20,19 +27,8 @@ const lobby = new Lobby()
 lobby.btnHost.addEventListener('click', async () => {
     playerName = lobby.inputName.value.trim()
 
+    game.host(playerName)
     // logToScreen("Attempting to host...");
-    try {
-        // .host() returns a Promise that gives us the session details
-        const response = await api.host({ name: playerName || "Host" });
-		myClientId = response.clientId
-        
-        console.log("Session created successfully!");
-        lobby.showStatusMessage(`You are hosting session ${response.session} as "${playerName}"`)
-        updateSessionInfo()
-        // switchToGameView(response.session);
-    } catch (err) {
-        console.log(`Error hosting: ${err}`);
-    }
 });
 
 // JOIN Button
@@ -50,7 +46,7 @@ lobby.btnJoin.addEventListener('click', async () => {
         myClientId = response.clientId
         
         lobby.showStatusMessage(`You are currently in session ${sessionId} as "${playerName}"`);
-        updateSessionInfo()
+        // updateSessionInfo()
         // switchToGameView(sessionId);
         
     } catch (err) {
@@ -59,7 +55,7 @@ lobby.btnJoin.addEventListener('click', async () => {
     }
 });
 
-// TRANSMIT Button
+// TRANSMIT Button -> change to a "Ready"-button
 lobby.btnPing.addEventListener('click', () => {
     const message = { 
         text: "Hello World!", 
@@ -90,12 +86,13 @@ async function updateSessionInfo() {
 api.listen((cmd, messageId, clientId, data) => {
     switch (cmd) {
         case 'game':
-			if (data.type === "keypress") console.log(data.name, data.key)
-            console.log(`Received message from ${clientId}: ${JSON.stringify(data)}`);
+
+        // if (data.type === "keypress") console.log(data.name, data.key)
+            // console.log(`Received message from ${clientId}: ${JSON.stringify(data)}`);
             break;
         case 'joined':
             console.log(`Player joined: ${data.name}(${clientId})`);
-            // logToScreen(`Player joined: ${clientId}`);
+            // ny mask
             break;
         case 'left':
             console.log(`Player left: ${clientId}`);
@@ -114,6 +111,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = 800;
 canvas.height = 600;
 
-const game = new Game(canvas, ctx);
-game.start();
+// Start a single player game if chosen
+// const game = new Game(canvas, ctx, api);
+// game.start();
 

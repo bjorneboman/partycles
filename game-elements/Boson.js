@@ -1,7 +1,7 @@
 import { Trail } from "./Trail.js";
 import { EMField } from "./EMField.js";
 
-export class Atom {
+export class Boson {
   constructor(x, y) {
     this.x = x;
     this.y = y;
