@@ -7,92 +7,66 @@
 
 import { Game } from "./modules/Game.js";
 import { mpapi } from "./modules/mpapi.js"
+import { PlaySession } from "./modules/PlaySession.js";
 import {Lobby} from './ui/lobby.js';
+
+// --- INITIALIZATION ---
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width = 800;
+canvas.height = 600;
 
 // const SERVER_URL = `${location.protocol === "https:" ? "wss" : "ws"}://localhost:8080/net`;
 const APP_ID = "partycles-game"
 const SERVER_URL = "wss://mpapi.se/net";
-let myClientId = null
-let playerName = ""
-// const players = {
-//     myClientId: {playerName: "Anon"}
-// }
+// let myClientId = null
 
-
-// --- INITIALIZATION ---
 const api = new mpapi(SERVER_URL, APP_ID);
 const lobby = new Lobby()
+const game = new Game(canvas, ctx, api);
+
+
+// --- UI EVENTLISTENERS ---
 
 // HOST Button
 lobby.btnHost.addEventListener('click', async () => {
-    playerName = lobby.inputName.value.trim()
-
-    game.host(playerName)
-    // logToScreen("Attempting to host...");
+    const playerName = lobby.inputName.value.trim()
+    game.host(lobby, playerName)
 });
 
 // JOIN Button
 lobby.btnJoin.addEventListener('click', async () => {
     const sessionId = lobby.inputSession.value.trim();
-    playerName = lobby.inputName.value.trim()
+    const playerName = lobby.inputName.value.trim()
     if (!sessionId) {
         alert("Please enter a Session ID first");
         return;
     }
-    
-    try {
-        // .join() returns a Promise
-        const response = await api.join(sessionId, {name: playerName || "Anon Player"});
-        myClientId = response.clientId
-        
-        lobby.showStatusMessage(`You are currently in session ${sessionId} as "${playerName}"`);
-        // updateSessionInfo()
-        // switchToGameView(sessionId);
-        
-    } catch (err) {
-        console.log(`Error joining: ${err}`);
-        alert("Could not join. Check the console or ensure the ID is correct.");
-    }
+    game.join(lobby, sessionId, playerName)
 });
 
-// TRANSMIT Button -> change to a "Ready"-button
-lobby.btnPing.addEventListener('click', () => {
-    const message = { 
-        text: "Hello World!", 
-        timestamp: Date.now(),
-        name: playerName
-    };
-    
-    // Send this object to everyone in the room
-    api.transmit(message);
-    
-    console.log("You sent a message.");
+lobby.btnReady.addEventListener('click', () => {
+    game.ready()   
 });
 
-window.addEventListener("keydown", (event) => {
-    api.transmit({type: "keypress", clientId: myClientId, key: event.key})
-})
-
-async function updateSessionInfo() {
-    try {
-        const response = await api.list("clients")
-        lobby.displaySessionInfo(JSON.stringify(response))
-
-    } catch (err) {
-        console.log(err)
-    }
-}
+// window.addEventListener("keydown", (event) => {
+//     api.transmit({type: "keypress", key: event.key})
+// })
 
 api.listen((cmd, messageId, clientId, data) => {
     switch (cmd) {
         case 'game':
-
-        // if (data.type === "keypress") console.log(data.name, data.key)
+            console.log(cmd, clientId, data)
+            if (data.isReady) game.start()
+             // if (data.type === "keypress") console.log(data.name, data.key)
             // console.log(`Received message from ${clientId}: ${JSON.stringify(data)}`);
             break;
         case 'joined':
-            console.log(`Player joined: ${data.name}(${clientId})`);
-            // ny mask
+            console.log(`Player joined: ${data}(${clientId})`);
+            // lägg till spelare i playSession.players hos Host
+            console.log(game.playSession)
+            // this.playSession.players.push({clientId: clientId, playerName: data.playerName})
             break;
         case 'left':
             console.log(`Player left: ${clientId}`);
@@ -104,14 +78,7 @@ api.listen((cmd, messageId, clientId, data) => {
 
 
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-// Kan uppgraderas till responsivt senare
-canvas.width = 800;
-canvas.height = 600;
 
 // Start a single player game if chosen
-// const game = new Game(canvas, ctx, api);
 // game.start();
 

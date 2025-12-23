@@ -1,33 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sv">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Partycles</title>
     <link rel="stylesheet" href="style.css" />
     <script src="main.js" type="module"></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <h1>Partycles</h1>
 
     <section id="lobby">
-
-        <button id="btn-host">Host Game</button>
-        <label for="input-session-id">Join a game:</label>
-        <input type="text" id="input-session-id" placeholder="Enter Session ID to Join">
-        <input type="text" id="input-name" placeholder="Enter Your Name">
-        <button id="btn-join">Join Game</button>
-        <button id="btn-ping">Send Test Command</button>
-        <div id="display-session-id">You are currently not in a game</div>
+      <button id="btn-host">Host Game</button>
+      <label for="input-session-id">Join a game:</label>
+      <input
+        type="text"
+        id="input-session-id"
+        placeholder="Enter Session ID to Join"
+      />
+      <input type="text" id="input-name" placeholder="Enter Your Name" />
+      <button id="btn-join">Join Game</button>
+      <button id="btn-ready">Ready to play!</button>
+      <div id="status-message">You are currently not in a game</div>
     </section>
+
     <section id="hud">
-        <span>Time:</span>
-        <span id="clock"></span>
-        <!-- More elements for game data -->
+      <span>Time:</span>
+      <span id="clock"></span>
+      <!-- More elements for game data -->
     </section>
+
     <canvas id="gameCanvas"></canvas>
-
-</body>
-
+  </body>
 </html>
