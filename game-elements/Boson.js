@@ -2,17 +2,17 @@ import { Trail } from "./Trail.js"
 import { EMField } from "./EMField.js"
 
 export class Boson {
-  constructor(x, y) {
-    this.spawnPoint = {x: x, y: y}
-    this.x = x
-    this.y = y
+  constructor(preset) {
+    this.spawnPoint = { x: preset.x, y: preset.y }
+    this.x = preset.x
+    this.y = preset.y
     this.lineUp = { x: 50, y: 50 }
     this.speed = 5
-    this.dir = { x: 1, y: 0 }
+    this.dir = {}
     this.radius = 10
 
-    this.orbital = new EMField(this.x, this.y)
-    this.trail = new Trail(this.x, this.y)
+    this.orbital = new EMField(this.spawnPoint.x, this.spawnPoint.y)
+    this.trail = new Trail(this.spawnPoint.x, this.spawnPoint.y)
   }
 
   update(isRunning) {
