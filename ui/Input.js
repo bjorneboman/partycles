@@ -1,5 +1,5 @@
-export function handleInput(boson) {
-  window.addEventListener("keydown", e => {
+export function handleInput(boson, key) {
+  // window.addEventListener("keydown", e => {
 
     // Relative controls (only left and right arrows)
     // if (e.key === "ArrowLeft")
@@ -21,11 +21,11 @@ export function handleInput(boson) {
     //   }
 
     // Absolute controls (up, down, left and right arrows)
-    if (e.key === "ArrowUp") boson.dir = { x: 0, y: -1 };
-    if (e.key === "ArrowDown") boson.dir = { x: 0, y: 1 };
-    if (e.key === "ArrowLeft") boson.dir = { x: -1, y: 0 };
-    if (e.key === "ArrowRight") boson.dir = { x: 1, y: 0 };
-  });
+    if (key === "ArrowUp") boson.dir = { x: 0, y: -1 };
+    if (key === "ArrowDown") boson.dir = { x: 0, y: 1 };
+    if (key === "ArrowLeft") boson.dir = { x: -1, y: 0 };
+    if (key === "ArrowRight") boson.dir = { x: 1, y: 0 };
+  // });
 }
 /*
 

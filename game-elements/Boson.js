@@ -8,7 +8,7 @@ export class Boson {
     this.y = preset.y
     this.lineUp = { x: 50, y: 50 }
     this.speed = 5
-    this.dir = {}
+    this.dir = {x: preset.dir, y: preset.dir.y}
     this.radius = 10
 
     this.orbital = new EMField(this.spawnPoint.x, this.spawnPoint.y)
@@ -17,6 +17,7 @@ export class Boson {
 
   update(isRunning) {
     if (isRunning) {
+      // console.log(this.dir)
       this.x += this.dir.x * this.speed
       this.y += this.dir.y * this.speed
     } else {

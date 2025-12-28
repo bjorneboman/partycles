@@ -27,9 +27,9 @@ export class PlaySession {
     // updates actual perceived game frame
     let now = Date.now()
     if (now >= this.next) {
-      this.next = now + 1000
+      this.next = now + 100
       let playerPositions = []
-      playerPositions.push({x: this.players[0].boson.x, y: this.players[0].boson.y })
+      playerPositions.push({x: this.players[0].boson.x, y: this.players[0].boson.y})
       const data = {
         type: "tickForward",
         playerPositions: playerPositions

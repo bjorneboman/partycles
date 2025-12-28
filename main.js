@@ -7,6 +7,7 @@ import { Game } from "./modules/Game.js"
 import { mpapi } from "./modules/mpapi.js"
 import { PlaySession } from "./modules/PlaySession.js"
 import { Lobby } from "./ui/lobby.js"
+import { handleInput } from "../ui/Input.js"
 
 // --- INITIALIZATION ---
 
@@ -47,34 +48,36 @@ lobby.btnReady.addEventListener("click", () => {
   game.ready()
 })
 
-// window.addEventListener("keydown", (event) => {
-//     api.transmit({type: "keypress", key: event.key})
-// })
-
 api.listen((cmd, messageId, clientId, data) => {
   switch (cmd) {
     case "game":
       let senderReference = null
-      if (game.hostPlaySession) {
-        senderReference = game.hostPlaySession.players.findIndex(
+      if (game.playSession.isHost) {
+        senderReference = game.playSession.players.findIndex(
           (p) => p.clientId === clientId
         )
       }
 
+      // Handeling player input
+      if (data.type === "keypress") {
+        const boson = game.playSession.players[senderReference].boson
+        handleInput(boson, data.key)
+      }
+
       // When receiving "player info" from client, update those properties for that client in the players array
-      if (data.type === "playerInfo" && game.hostPlaySession) {
-        game.hostPlaySession.players[senderReference].playerName =
+      if (data.type === "playerInfo" && game.playSession.isHost) {
+        game.playSession.players[senderReference].playerName =
           data.playerInfo.playerName
-        console.log(game.hostPlaySession.players)
+        console.log(game.playSession.players)
       }
 
       // When receiving "ready to play" from client, set that client to "isReady" in the players array
-      if (data.isReady && game.hostPlaySession) {
-        console.log(game.hostPlaySession.players)
-        game.hostPlaySession.players[senderReference].isReady = true
+      if (data.isReady && game.playSession.isHost) {
+        console.log(game.playSession.players)
+        game.playSession.players[senderReference].isReady = true
 
         // Check if all players are ready, if so transmit game start
-        if (game.hostPlaySession.players.find((p) => p.isReady === false))
+        if (game.playSession.players.find((p) => p.isReady === false))
           return null
         else {
           const initPhotons = game.initPhotons()
@@ -83,27 +86,26 @@ api.listen((cmd, messageId, clientId, data) => {
       }
 
       if (data.type === "startgame") {
+        window.addEventListener("keydown", (event) =>
+          api.transmit({ type: "keypress", key: event.key })
+        )
         game.start(data.levelInit)
       }
 
       // Handle incoming game tick (playSession.frame), pass on to rendering
-      if (data.type === "tickForward") {
-        game.hostPlaySession
-          ? game.hostPlaySession.handleTick(data.playerPositions)
-          : game.playSession.handleTick(data.playerPositions)
-      }
+      if (data.type === "tickForward")
+        game.tickForward(data.playerPositions)
+        
 
       break
     case "joined":
       console.log(`Player joined: ${JSON.stringify(data)}(${clientId})`)
       // lägg till spelare i hostPlaySession.players hos Host
-      if (game.hostPlaySession)
-        game.hostPlaySession.players.push({
+      if (game.playSession.isHost)
+        game.playSession.players.push({
           clientId: clientId,
           playerName: data.playerName,
         })
-      console.log(game.hostPlaySession.players)
-      // this.playSession.players.push({clientId: clientId, playerName: data.playerName})
       break
     case "left":
       console.log(`Player left: ${clientId}`)
