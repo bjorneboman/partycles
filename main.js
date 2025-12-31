@@ -1,5 +1,4 @@
 // TODO's //
-// 1. Make one boson controlled by host move synchronously for everyone
 // 2. Spawn a boson for every client
 // 3. Make all bosons move synchronously for everyone
 
@@ -71,15 +70,16 @@ api.listen((cmd, messageId, clientId, data) => {
       }
 
       // When receiving "ready to play" from client, set that client to "isReady" in the players array
-      if (data.isReady && game.playSession.isHost) {
+      if (data.type === "isReady" && game.playSession.isHost) {
         game.playSession.players[senderReference].isReady = true
 
         // Check if all players are ready, if so transmit game start
-        if (game.playSession.players.find((p) => p.isReady === false))
-          return null
-        else {
+        let go = true
+        game.playSession.players.forEach((p) => {
+          if (!p.isReady) go = false
+        })
+        if (go) {
           const initPhotons = game.initPhotons()
-          console.log(game.playSession.players)
           api.transmit({
             type: "startgame",
             levelInit: initPhotons,
@@ -106,19 +106,13 @@ api.listen((cmd, messageId, clientId, data) => {
         game.photons.forEach((p, i) => {
           p.x = data.photons[i].x
           p.y = data.photons[i].y
-          console.log(data.photons[i], p)
         })
-
-        // game.photons = data.photons.map((p) =>
-        //   Object.assign(Object.create(Object.getPrototypeOf(p)), p)
-        // )
-        console.log(game.photons, data.photons)
 
         // Update boson state of absorbant player
         game.playSession.players[data.playerIndex].boson.extend()
       }
-
       break
+
     case "joined":
       console.log(`Player joined: ${JSON.stringify(data)}(${clientId})`)
       // lägg till spelare i hostPlaySession.players hos Host
@@ -128,9 +122,11 @@ api.listen((cmd, messageId, clientId, data) => {
           playerName: data.playerName,
         })
       break
+
     case "left":
       console.log(`Player left: ${clientId}`)
       break
+
     default:
       console.log("Unknown command:", cmd)
   }

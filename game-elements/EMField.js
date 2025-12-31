@@ -1,17 +1,17 @@
 export class EMField {
   constructor(x, y) {
     this.size = 40
-    this.path = [{x: x, y: y}]
+    this.path = [{x: x, y: y}, {x: x, y: y}]
   }
   
-  update(atom) {
+  update(boson) {
     this.path.unshift({ 
-      x: atom.x, 
-      y: atom.y
+      x: boson.x, 
+      y: boson.y
     })
     if (this.path.length > this.size) {
       this.path.pop();
-      this.path[this.path.length - 1] = {x: atom.x, y: atom.y}
+      this.path[this.path.length - 1] = {x: boson.x, y: boson.y}
     }
   }
   

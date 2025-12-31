@@ -13,7 +13,7 @@ export class Game {
     this.ctx = ctx
     this.api = api
 
-    this.gameLenghtInMS = 10000
+    this.gameLenghtInMS = 30000
     this.timeLeft = this.gameLenghtInMS
     this.startTime = null
     this.clockElement = document.querySelector("#clock")
@@ -25,12 +25,32 @@ export class Game {
         x: 100,
         y: 100,
         dir: { x: 1, y: 0 },
+        color: "0,255,255",
+        lineUp: { x: 100, y: 200 },
       },
       {
         speed: 5,
         x: 700,
         y: 500,
         dir: { x: -1, y: 0 },
+        color: "255,80,226",
+        lineUp: { x: 125, y: 250 },
+      },
+      {
+        speed: 5,
+        x: 500,
+        y: 100,
+        dir: { x: 0, y: 1 },
+        color: "40,255,40",
+        lineUp: { x: 150, y: 300 },
+      },
+      {
+        speed: 5,
+        x: 100,
+        y: 500,
+        dir: { x: 0, y: -1 },
+        color: "255,145,0",
+        lineUp: { x: 175, y: 350 },
       },
     ]
 
@@ -41,14 +61,22 @@ export class Game {
     this.isRunning = false
     this.rAF = null
 
+    // Background music setup
+    // Put your MP3 file at assets/music/track.mp3 (or update the path below)
+    this.bgMusic = new Audio("assets/start-screen.mp3")
+    this.bgMusic.loop = true
+    this.bgMusic.volume = 0.5
+    this.musicEnabled = true
+
     // handleInput(this.boson)
   }
 
   async host(lobby, playerName) {
     try {
-      if (!playerName || playerName === "" || typeof playerName !== String)
-        playerName = "Host"
-
+      console.log(playerName)
+      if (!playerName || playerName === "" || typeof playerName !== String) {playerName = "Host"}
+      console.log(playerName)
+      
       const response = await this.api.host({
         name: playerName,
         playerName: playerName,
@@ -81,7 +109,7 @@ export class Game {
       const response = await this.api.join(sessionId, {
         playerName: playerName,
       })
-      this.playSession = new PlaySession( // sätt först in host med hostId som clientId i players-arrayen
+      this.playSession = new PlaySession( // sätt först in host med hostId som clientId i players-arrayen???
         false,
         this.api,
         response.clientId,
@@ -102,8 +130,7 @@ export class Game {
   }
 
   ready() {
-    const message = { isReady: true }
-    this.api.transmit(message)
+    this.api.transmit({ type: "isReady" })
   }
 
   initPhotons() {
@@ -117,8 +144,11 @@ export class Game {
 
   start(firstPhotons) {
     this.playCounter++
+
     console.log("Game nr", this.playCounter, "started")
+
     this.startTime = Date.now()
+
     // Pre-spawn photons
     for (let i = 0; i < 5; i++) {
       this.photons[i] = new Photon(firstPhotons[i].x, firstPhotons[i].y)
@@ -148,6 +178,25 @@ export class Game {
 
     this.isRunning = true
     this.loop()
+
+    // Attempt to play music — note: browsers often require a user gesture
+    if (this.musicEnabled) {
+      this.bgMusic.play().catch((err) =>
+        console.log("Background music blocked until user interaction:", err)
+      )
+    }
+  }
+
+  // Simple music toggle utility (call from UI)
+  toggleMusic() {
+    if (!this.bgMusic) return
+    if (this.bgMusic.paused) {
+      this.bgMusic.play().catch((err) =>
+        console.log("Music play blocked until user interaction:", err)
+      )
+    } else {
+      this.bgMusic.pause()
+    }
   }
 
   gameClock(now) {
@@ -170,7 +219,7 @@ export class Game {
 
   // NOTE: Handles everything that happens every AnimationFrame, e.g.graphics updates and collisions occuring inbetween game ticks
   update(isRunning) {
-    this.playSession.players[0].boson.update(isRunning)
+    this.playSession.players.forEach((player) => player.boson.update(isRunning))
 
     if (isRunning && this.playSession.isHost) {
       // Foton-kollisioner
@@ -178,30 +227,33 @@ export class Game {
       // const p = this.photons[i]
 
       this.photons.forEach((photon, photonIndex) => {
-        // Check for collisions
-        if (this.playSession.players[0].boson.collidesWithPhoton(photon)) {
-          // Remove photon from array
-          this.photons.splice(photonIndex, 1)
+        this.playSession.players.forEach((player, index) => {
+          // Check for collisions
+          if (player.boson.collidesWithPhoton(photon)) {
 
-          // Spawn new photon
-          const { x, y } = randomPhotonPosition(this.canvas)
-          this.photons.push(new Photon(x, y))
+            // Move hit photon to new location (faking absorbtion and reemergance)
+            const { x, y } = randomPhotonPosition(this.canvas)
+            photon.x = x
+            photon.y = y
 
-          // Reference absorbant boson
-          const playerIndex = 0
+            // Reference absorbant boson
+            const playerIndex = index
 
-          // Send update to clients
-          this.api.transmit({
-            type: "photonAbsorbtion",
-            playerIndex: playerIndex,
-            photons: this.photons,
-          })
-        }
+            // Send update to clients
+            this.api.transmit({
+              type: "photonAbsorbtion",
+              playerIndex: playerIndex,
+              photons: this.photons,
+            })
+          }
+        })
       })
 
       // Kollisioner med vägg
-      if (this.playSession.players[0].boson.collidesWithWall(this.canvas))
-        this.annihilation(this.playSession.players[0].boson)
+      this.playSession.players.forEach(player => {
+        if (player.boson.collidesWithWall(this.canvas))
+          this.annihilation(player.boson)
+      })
 
       // TODO: Kollisioner med egen svans
     }
@@ -214,6 +266,16 @@ export class Game {
     this.clockElement.textContent = "GAME OVER"
     this.photons = []
     console.log("Game nr", this.playCounter, " as it has been... is over")
+
+    // Stop and reset music
+    if (this.bgMusic) {
+      try {
+        this.bgMusic.pause()
+        this.bgMusic.currentTime = 0
+      } catch (e) {
+        // ignore if paused or unavailable
+      }
+    }
   }
 
   tickForward(playerPositions) {
@@ -229,6 +291,8 @@ export class Game {
       })
     }
 
-    this.playSession.players[0].boson.draw(this.renderer, this.isRunning)
+    this.playSession.players.forEach((p) =>
+      p.boson.draw(this.renderer, this.isRunning)
+    )
   }
 }
