@@ -35,7 +35,7 @@ export class Trail {
   }
 
 
-  draw(r) {
+  draw(r, color) {
     this.segments[1].y -=
       (this.segments[0].x - this.segments[1].x) * (Math.random() - 0.5) * 3
     this.segments[1].x -=
@@ -48,7 +48,7 @@ export class Trail {
         this.segments[i].x,
         this.segments[i].y,
         1 * rollOff,
-        `rgba(0,255,255,${rollOff * 0.66 + 0.8})`
+        `rgba(${color},${rollOff * 0.66 + 0.8})`
       )
     }
   }

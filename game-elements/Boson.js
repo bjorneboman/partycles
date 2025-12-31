@@ -6,10 +6,12 @@ export class Boson {
     this.spawnPoint = { x: preset.x, y: preset.y }
     this.x = preset.x
     this.y = preset.y
-    this.lineUp = { x: 50, y: 50 }
+    this.lineUp = { x: preset.lineUp.x, y: preset.lineUp.y }
     this.speed = 5
     this.dir = {x: preset.dir.x, y: preset.dir.y}
     this.radius = 10
+
+    this.color = preset.color
 
     this.orbital = new EMField(this.spawnPoint.x, this.spawnPoint.y)
     this.trail = new Trail(this.spawnPoint.x, this.spawnPoint.y)
@@ -53,8 +55,8 @@ export class Boson {
   }
 
   draw(r, isRunning) {
-    r.circle(this.x, this.y, this.radius, "cyan")
+    r.circle(this.x, this.y, this.radius, this.color)
     this.orbital.draw(r, this.dir, isRunning)
-    this.trail.draw(r)
+    this.trail.draw(r, this.color)
   }
 }

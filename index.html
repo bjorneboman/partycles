@@ -4,30 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Partycles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
     <script src="main.js" type="module"></script>
   </head>
 
   <body>
-    <h1>Partycles</h1>
+    <h1>Party<span>cles</span></h1>
 
     <section id="lobby">
-      <button id="btn-host">Host Game</button>
-      <label for="input-session-id">Join a game:</label>
-      <input
-        type="text"
-        id="input-session-id"
-        placeholder="Enter Session ID to Join"
-      />
-      <input type="text" id="input-name" placeholder="Enter Your Name" />
-      <button id="btn-join">Join Game</button>
-      <button id="btn-ready">Ready to play!</button>
-      <div id="status-message">You are currently not in a game</div>
+      <div class="col">
+        <label for="input-name">State your identifying designation (your awesome player name):</label>
+        <input type="text" id="input-name" placeholder="Enter Your Name" />
+        <div>
+          <label for="btn-host">Host a new game:</label>
+          <button id="btn-host">Host Game</button>
+        </div>
+        <label for="input-session-id">Or join an existing game:</label>
+        <div>
+         <input
+         type="text"
+         id="input-session-id"
+         placeholder="Enter Session ID to Join"
+         />
+         <button id="btn-join">Join Game</button>
+        </div>
+        <button id="btn-ready">Ready to play!</button>
+      </div>
+      <div class="col" id="status-message">You are currently not in a game</div>
     </section>
 
     <section id="hud">
-      <span>Time:</span>
-      <span id="clock"></span>
+      <p>Time:</p>
+      <p id="clock">waiting...</p>
       <!-- More elements for game data -->
     </section>
 

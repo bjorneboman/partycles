@@ -10,8 +10,8 @@ export class Renderer {
   circle(x, y, radius, color) {
     this.ctx.save()
     
-    this.ctx.fillStyle = color
-    this.ctx.shadowColor = color
+    this.ctx.fillStyle = `rgba(${color}, 1)`
+    this.ctx.shadowColor = `rgba(${color}, 1)`
     this.ctx.shadowBlur = 10
     
     this.ctx.beginPath();
