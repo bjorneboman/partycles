@@ -5,8 +5,8 @@ export class Photon {
     this.radius = 6;
   }
 
-    draw(r) {
-      const jitter = {x: (Math.random() - .5) * 2, y: (Math.random() - .5) * 2 }
+  draw(r) {
+    const jitter = {x: (Math.random() - .5) * 2, y: (Math.random() - .5) * 2 }
     r.circle(this.x + jitter.x, this.y + jitter.y, this.radius, "yellow");
   }
 }
