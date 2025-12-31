@@ -62,10 +62,14 @@ export class Game {
     this.rAF = null
 
     // Background music setup
-    // Put your MP3 file at assets/music/track.mp3 (or update the path below)
-    this.bgMusic = new Audio("assets/start-screen.mp3")
-    this.bgMusic.loop = true
-    this.bgMusic.volume = 0.5
+    this.mainMusic = new Audio("assets/spontanious-emergence.mp3")
+    this.mainMusic.loop = true
+    this.mainMusic.volume = 0.5
+    
+    this.gameOverMusic = new Audio("assets\gray-antimatter.mp3")
+    this.gameOverMusic.loop = false
+    this.gameOverMusic.volume = 0.5
+   
     this.musicEnabled = true
 
     // handleInput(this.boson)
@@ -179,23 +183,23 @@ export class Game {
     this.isRunning = true
     this.loop()
 
-    // Attempt to play music — note: browsers often require a user gesture
+
     if (this.musicEnabled) {
-      this.bgMusic.play().catch((err) =>
+      this.mainMusic.play().catch((err) =>
         console.log("Background music blocked until user interaction:", err)
       )
     }
   }
 
-  // Simple music toggle utility (call from UI)
+  // Music toggle 
   toggleMusic() {
-    if (!this.bgMusic) return
-    if (this.bgMusic.paused) {
-      this.bgMusic.play().catch((err) =>
+    if (!this.mainMusic) return
+    if (this.mainMusic.paused) {
+      this.mainMusic.play().catch((err) =>
         console.log("Music play blocked until user interaction:", err)
       )
     } else {
-      this.bgMusic.pause()
+      this.mainMusic.pause()
     }
   }
 
@@ -268,14 +272,14 @@ export class Game {
     console.log("Game nr", this.playCounter, " as it has been... is over")
 
     // Stop and reset music
-    if (this.bgMusic) {
-      try {
-        this.bgMusic.pause()
-        this.bgMusic.currentTime = 0
-      } catch (e) {
-        // ignore if paused or unavailable
-      }
-    }
+    // if (this.mainMusic) {
+    //   try {
+    //     this.mainMusic.pause()
+    //     this.mainMusic.currentTime = 0
+    //   } catch (e) {
+    //     // ignore if paused or unavailable
+    //   }
+    // }
   }
 
   tickForward(playerPositions) {
