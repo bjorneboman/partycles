@@ -52,7 +52,7 @@ api.listen((cmd, messageId, clientId, data) => {
   switch (cmd) {
     case "game":
       let senderReference = null
-      if (game.playSession.isHost) {
+      if (game.playSession) {
         senderReference = game.playSession.players.findIndex(
           (p) => p.clientId === clientId
         )
@@ -68,12 +68,10 @@ api.listen((cmd, messageId, clientId, data) => {
       if (data.type === "playerInfo" && game.playSession.isHost) {
         game.playSession.players[senderReference].playerName =
           data.playerInfo.playerName
-        console.log(game.playSession.players)
       }
 
       // When receiving "ready to play" from client, set that client to "isReady" in the players array
       if (data.isReady && game.playSession.isHost) {
-        console.log(game.playSession.players)
         game.playSession.players[senderReference].isReady = true
 
         // Check if all players are ready, if so transmit game start
@@ -81,7 +79,12 @@ api.listen((cmd, messageId, clientId, data) => {
           return null
         else {
           const initPhotons = game.initPhotons()
-          api.transmit({ type: "startgame", levelInit: initPhotons })
+          console.log(game.playSession.players)
+          api.transmit({
+            type: "startgame",
+            levelInit: initPhotons,
+            playersList: game.playSession.players,
+          })
         }
       }
 
@@ -89,13 +92,31 @@ api.listen((cmd, messageId, clientId, data) => {
         window.addEventListener("keydown", (event) =>
           api.transmit({ type: "keypress", key: event.key })
         )
+        if (!game.playSession.isHost)
+          game.playSession.players = data.playersList
         game.start(data.levelInit)
       }
 
       // Handle incoming game tick (playSession.frame), pass on to rendering
-      if (data.type === "tickForward")
-        game.tickForward(data.playerPositions)
-        
+      if (data.type === "tickForward") game.tickForward(data.playerPositions)
+
+      // Handle incoming photon absorbtion
+      if (data.type === "photonAbsorbtion") {
+        // Update photons array
+        game.photons.forEach((p, i) => {
+          p.x = data.photons[i].x
+          p.y = data.photons[i].y
+          console.log(data.photons[i], p)
+        })
+
+        // game.photons = data.photons.map((p) =>
+        //   Object.assign(Object.create(Object.getPrototypeOf(p)), p)
+        // )
+        console.log(game.photons, data.photons)
+
+        // Update boson state of absorbant player
+        game.playSession.players[data.playerIndex].boson.extend()
+      }
 
       break
     case "joined":

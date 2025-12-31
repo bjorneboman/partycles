@@ -8,7 +8,7 @@ export class Boson {
     this.y = preset.y
     this.lineUp = { x: 50, y: 50 }
     this.speed = 5
-    this.dir = {x: preset.dir, y: preset.dir.y}
+    this.dir = {x: preset.dir.x, y: preset.dir.y}
     this.radius = 10
 
     this.orbital = new EMField(this.spawnPoint.x, this.spawnPoint.y)

@@ -20,12 +20,12 @@ export class Trail {
     this.size++
   }
 
-  reset(x, y) {
+  reset(_x, _y) {
     this.size = 2
     // this.segments.length = 0
     this.segments = [
-      { x: x, y: y },
-      { x: x, y: y },
+      { x: _x, y: _y },
+      { x: _x, y: _y },
     ]
   }
 

@@ -7,6 +7,8 @@ import { resetHUD } from "../ui/hud.js"
 
 export class Game {
   constructor(canvas, ctx, api) {
+    this.playCounter = 0
+
     this.canvas = canvas
     this.ctx = ctx
     this.api = api
@@ -79,8 +81,7 @@ export class Game {
       const response = await this.api.join(sessionId, {
         playerName: playerName,
       })
-
-      this.playSession = new PlaySession(
+      this.playSession = new PlaySession( // sätt först in host med hostId som clientId i players-arrayen
         false,
         this.api,
         response.clientId,
@@ -109,13 +110,14 @@ export class Game {
     let photons = []
     for (let i = 0; i < 5; i++) {
       const { x, y } = randomPhotonPosition(this.canvas)
-      photons.push({ x, y })
+      photons.push(new Photon(x, y))
     }
     return photons
   }
 
   start(firstPhotons) {
-    console.log("Game started")
+    this.playCounter++
+    console.log("Game nr", this.playCounter, "started")
     this.startTime = Date.now()
     // Pre-spawn photons
     for (let i = 0; i < 5; i++) {
@@ -130,40 +132,29 @@ export class Game {
     this.timeLeft = this.gameLenghtInMS
     this.clockElement.textContent = this.timeLeft
 
-    // Reposition Bosons, set directions and reset Bosonic energy trails
-    // if (this.hostPlaySession) {
-    //   this.hostPlaySession.players.forEach((player, index) => {
-    //     if (!player.boson) player.boson = new Boson(this.bosonPresets[index])
-    //     player.boson.x = this.bosonPresets[index].x
-    //     player.boson.y = this.bosonPresets[index].y
-    //     player.boson.dir = this.bosonPresets[index].dir
-    //     player.boson.trail.reset(player.boson.x, player.boson.y)
-    //   })
-    // } else {
     this.playSession.players.forEach((player, index) => {
-      if (!player.boson) player.boson = new Boson(this.bosonPresets[index])
-      else {
+      if (!(player.boson instanceof Boson)) {
+        player.boson = new Boson(this.bosonPresets[index])
+      } else {
         player.boson.x = this.bosonPresets[index].x
         player.boson.y = this.bosonPresets[index].y
         player.boson.dir = this.bosonPresets[index].dir
-      } 
-     player.boson.trail.reset(player.boson.x, player.boson.y)
+      }
+      player.boson.trail.reset(
+        this.bosonPresets[index].x,
+        this.bosonPresets[index].y
+      )
     })
-    // }
+
     this.isRunning = true
-    // this.timer = setInterval(() => {
-    //   this.gameClock()
-    // }, 1000)
     this.loop()
   }
 
   gameClock(now) {
     if (this.timeLeft <= 0) {
       this.isRunning = false
-      // clearInterval(this.timer)
       this.gameOver()
     } else {
-      //   this.timeLeft -= 1
       this.timeLeft = this.gameLenghtInMS - (now - this.startTime)
       this.clockElement.textContent = this.timeLeft
     }
@@ -177,23 +168,36 @@ export class Game {
     this.rAF = requestAnimationFrame(() => this.loop())
   }
 
-  // NOTE: Updates everything that happens every AnimationFrame, not hostPlaySession.frame!
+  // NOTE: Handles everything that happens every AnimationFrame, e.g.graphics updates and collisions occuring inbetween game ticks
   update(isRunning) {
     this.playSession.players[0].boson.update(isRunning)
 
-    if (isRunning) {
+    if (isRunning && this.playSession.isHost) {
       // Foton-kollisioner
-      for (let i = 0; i < this.photons.length; i++) {
-        const p = this.photons[i]
-        if (this.playSession.players[0].boson.collidesWithPhoton(p)) {
-          this.photons.splice(i, 1)
-          this.playSession.players[0].boson.extend()
+      // for (let i = 0; i < this.photons.length; i++) {
+      // const p = this.photons[i]
 
-          // Spawn ny foton
+      this.photons.forEach((photon, photonIndex) => {
+        // Check for collisions
+        if (this.playSession.players[0].boson.collidesWithPhoton(photon)) {
+          // Remove photon from array
+          this.photons.splice(photonIndex, 1)
+
+          // Spawn new photon
           const { x, y } = randomPhotonPosition(this.canvas)
           this.photons.push(new Photon(x, y))
+
+          // Reference absorbant boson
+          const playerIndex = 0
+
+          // Send update to clients
+          this.api.transmit({
+            type: "photonAbsorbtion",
+            playerIndex: playerIndex,
+            photons: this.photons,
+          })
         }
-      }
+      })
 
       // Kollisioner med vägg
       if (this.playSession.players[0].boson.collidesWithWall(this.canvas))
@@ -209,6 +213,7 @@ export class Game {
   gameOver() {
     this.clockElement.textContent = "GAME OVER"
     this.photons = []
+    console.log("Game nr", this.playCounter, " as it has been... is over")
   }
 
   tickForward(playerPositions) {
@@ -218,7 +223,11 @@ export class Game {
   render() {
     this.renderer.clear(this.canvas)
 
-    if (this.isRunning) this.photons.forEach((p) => p.draw(this.renderer))
+    if (this.isRunning) {
+      this.photons.forEach((p) => {
+        p.draw(this.renderer)
+      })
+    }
 
     this.playSession.players[0].boson.draw(this.renderer, this.isRunning)
   }
