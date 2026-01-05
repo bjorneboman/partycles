@@ -1,7 +1,3 @@
-// TODO's //
-// 2. Spawn a boson for every client
-// 3. Make all bosons move synchronously for everyone
-
 import { Game } from "./modules/Game.js"
 import { mpapi } from "./modules/mpapi.js"
 import { PlaySession } from "./modules/PlaySession.js"
