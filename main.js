@@ -6,7 +6,7 @@ import { Game } from "./modules/Game.js"
 import { mpapi } from "./modules/mpapi.js"
 import { PlaySession } from "./modules/PlaySession.js"
 import { Lobby } from "./ui/lobby.js"
-import { handleInput } from "../ui/Input.js"
+import { handleInput } from "./ui/Input.js"
 
 // --- INITIALIZATION ---
 
